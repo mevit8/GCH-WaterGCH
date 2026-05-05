@@ -2,8 +2,7 @@
 utils/download_data.py — Downloads data files from Google Drive at startup
 if they are not already present in the data/ folder.
 
-Called once from utils/data.py before load_data() runs.
-Uses requests to stream files, handling Drive's large-file confirmation page.
+Called once from streamlit_app.py before anything else runs.
 """
 
 import zipfile
@@ -25,50 +24,6 @@ def _download(filename: str, file_id: str):
     print(f"Downloading {filename} from Google Drive…")
 
     session = requests.Session()
-    url = "https://drive.google.com/uc"
-
-    resp = session.get(
-        url,
-        params={"export": "download", "id": file_id},
-        stream=True,
-        timeout=60,
-    )
-    resp.raise_for_status()
-
-    token = next(
-        (v for k, v in resp.cookies.items() if k.startswith("download_warning")),
-        None,
-    )
-    if token:
-        resp = session.get(
-            url,
-            params={"export": "download", "id": file_id, "confirm": token},
-            stream=True,
-            timeout=60,
-        )
-        resp.raise_for_status()
-
-    # Detect HTML error page (happens when file is private or quota exceeded)
-    content_type = resp.headers.get("Content-Type", "")
-    if "text/html" in content_type:
-        raise RuntimeError(
-            f"Google Drive returned an HTML page instead of {filename}. "
-            "Check that the file is shared as 'Anyone with the link → Viewer' "
-            "and that download quota hasn't been exceeded."
-        )
-
-    with open(dest, "wb") as f:
-        for chunk in resp.iter_content(chunk_size=1 << 20):
-            if chunk:
-                f.write(chunk)
-
-    print(f"  ✓ {filename} ({dest.stat().st_size / 1e6:.1f} MB)")def _download(filename: str, file_id: str):
-    dest = DATA_DIR / filename
-    print(f"Downloading {filename} from Google Drive…")
-
-    session = requests.Session()
-
-    # Google now serves downloads from drive.usercontent.google.com
     url = (
         f"https://drive.usercontent.google.com/download"
         f"?id={file_id}&export=download&authuser=0&confirm=t"
@@ -81,8 +36,7 @@ def _download(filename: str, file_id: str):
     if "text/html" in content_type:
         raise RuntimeError(
             f"Google Drive returned an HTML page instead of {filename}. "
-            "Quota may be exceeded — try again in 24 hours, or switch to a "
-            "different host (Hugging Face Hub recommended)."
+            "Quota may be exceeded or file permissions are wrong."
         )
 
     with open(dest, "wb") as f:
@@ -107,7 +61,6 @@ def ensure_data():
     if not SHP_FILE.exists():
         zip_path = DATA_DIR / "pfaf_lev06_merged.zip"
 
-        # Delete corrupt zip from a previous failed attempt
         if zip_path.exists():
             print("Removing previous (possibly corrupt) zip...")
             zip_path.unlink()
@@ -122,7 +75,10 @@ def ensure_data():
             zip_path.unlink()
             print("Shapefile extracted.")
         except zipfile.BadZipFile:
-            zip_path.unlink()  # delete corrupt file so next run re-downloads
-            raise RuntimeError("Downloaded zip is corrupt — likely an HTML error page from Drive. Check file sharing permissions.")
+            zip_path.unlink()
+            raise RuntimeError(
+                "Downloaded zip is corrupt — likely an HTML error page from Drive. "
+                "Check file sharing permissions or try again in 24h if quota is exceeded."
+            )
 
     print("ensure_data() complete.")
