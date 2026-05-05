@@ -37,22 +37,24 @@ def _download(filename: str, file_id: str):
 
 
 def ensure_data():
-    """Download and unzip data files if not already present. Safe to call multiple times."""
-    DATA_DIR.mkdir(exist_ok=True)
+    """Download and unzip data files if not already present."""
+    print(f"ensure_data() called. DATA_DIR={DATA_DIR}, exists={DATA_DIR.exists()}")
+    DATA_DIR.mkdir(exist_ok=True, parents=True)
 
-    # --- CSV ---
     csv_path = DATA_DIR / "aqueduct_pfaf_panel_enriched.csv"
+    print(f"CSV exists: {csv_path.exists()}")
     if not csv_path.exists():
+        print("Downloading CSV...")
         _download("aqueduct_pfaf_panel_enriched.csv", GDRIVE_IDS["aqueduct_pfaf_panel_enriched.csv"])
 
-    # --- Shapefile (zipped) ---
     if not SHP_FILE.exists():
+        print("Downloading shapefile ZIP...")
         zip_path = DATA_DIR / "pfaf_lev06_merged.zip"
         if not zip_path.exists():
             _download("pfaf_lev06_merged.zip", GDRIVE_IDS["pfaf_lev06_merged.zip"])
-        print("Extracting shapefile…")
+        print("Extracting shapefile...")
         with zipfile.ZipFile(zip_path, "r") as zf:
             zf.extractall(DATA_DIR)
-        print("  ✓ shapefile extracted")
+        print("Shapefile extracted.")
 
-    print("Data ready.")
+    print("ensure_data() complete.")
