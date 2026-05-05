@@ -5,8 +5,7 @@ Everything else is derived from the original scripts.
 import os
 from pathlib import Path
 
-_DATA_DIR = Path(os.environ.get("DATA_DIR", "data"))
-
+_DATA_DIR = Path("/data")
 ENRICHED_CSV    = _DATA_DIR / "aqueduct_pfaf_panel_enriched.csv"
 HYDROBASINS_SHP = _DATA_DIR / "pfaf_lev06_merged.shp"
 
