@@ -35,7 +35,6 @@ def _download(filename: str, file_id: str):
     )
     resp.raise_for_status()
 
-    # Large files get a virus-scan warning page — Drive sets a confirmation cookie
     token = next(
         (v for k, v in resp.cookies.items() if k.startswith("download_warning")),
         None,
@@ -49,13 +48,19 @@ def _download(filename: str, file_id: str):
         )
         resp.raise_for_status()
 
+    # Detect HTML error page (happens when file is private or quota exceeded)
+    content_type = resp.headers.get("Content-Type", "")
+    if "text/html" in content_type:
+        raise RuntimeError(
+            f"Google Drive returned an HTML page instead of {filename}. "
+            "Check that the file is shared as 'Anyone with the link → Viewer' "
+            "and that download quota hasn't been exceeded."
+        )
+
     with open(dest, "wb") as f:
-        for chunk in resp.iter_content(chunk_size=1 << 20):  # 1 MB chunks
+        for chunk in resp.iter_content(chunk_size=1 << 20):
             if chunk:
                 f.write(chunk)
-
-    if not dest.exists() or dest.stat().st_size < 1000:
-        raise RuntimeError(f"Download failed or file suspiciously small: {dest}")
 
     print(f"  ✓ {filename} ({dest.stat().st_size / 1e6:.1f} MB)")
 
