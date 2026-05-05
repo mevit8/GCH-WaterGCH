@@ -1,12 +1,2 @@
-# Create railway.toml in your project root
-@"
 [deploy]
-startCommand = "streamlit run streamlit_app.py --server.port=\$PORT --server.address=0.0.0.0"
-
-[build]
-builder = "nixpacks"
-"@ | Out-File -FilePath railway.toml -Encoding utf8
-
-git add railway.toml
-git commit -m "chore: add Railway deployment config"
-git push
+startCommand = "streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0"
