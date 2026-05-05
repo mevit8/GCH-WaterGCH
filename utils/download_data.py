@@ -9,7 +9,8 @@ Uses gdown which handles Google Drive's large-file virus-scan bypass.
 import zipfile
 from pathlib import Path
 
-DATA_DIR = Path("data")
+import os
+DATA_DIR = Path("/data") if os.environ.get("RAILWAY_ENVIRONMENT") else Path("data")
 
 # Google Drive file IDs
 GDRIVE_IDS = {

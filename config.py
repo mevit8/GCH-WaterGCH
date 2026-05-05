@@ -2,11 +2,14 @@
 config.py — Edit the two PATH lines to match your setup.
 Everything else is derived from the original scripts.
 """
+import os
 from pathlib import Path
 
-# ── Data paths ── change these ───────────────────────────────────────────────
-ENRICHED_CSV    = Path("data/aqueduct_pfaf_panel_enriched.csv")
-HYDROBASINS_SHP = Path("data/pfaf_lev06_merged.shp")
+# Use /data (Railway volume) in production, local data/ folder otherwise
+_DATA_DIR = Path("/data") if os.environ.get("RAILWAY_ENVIRONMENT") else Path("data")
+
+ENRICHED_CSV    = _DATA_DIR / "aqueduct_pfaf_panel_enriched.csv"
+HYDROBASINS_SHP = _DATA_DIR / "pfaf_lev06_merged.shp"
 
 # ── Stress colour palette (matches WRI Aqueduct) ─────────────────────────────
 STRESS_COLORS = ["#2E7D32", "#9CCC65", "#FFEB3B", "#FB8C00", "#C62828"]
