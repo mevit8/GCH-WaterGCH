@@ -48,11 +48,19 @@ def _download(filename: str, file_id: str):
 
 
 def ensure_data():
-    """Download and unzip data files if not already present."""
     print(f"ensure_data() called. DATA_DIR={DATA_DIR}, exists={DATA_DIR.exists()}")
     DATA_DIR.mkdir(exist_ok=True, parents=True)
 
     csv_path = DATA_DIR / "aqueduct_pfaf_panel_enriched.csv"
+
+    # Validate existing CSV — delete if it's a corrupt HTML page
+    if csv_path.exists():
+        with open(csv_path, "rb") as f:
+            head = f.read(512)
+        if b"<!DOCTYPE" in head or b"<html" in head or csv_path.stat().st_size < 1_000_000:
+            print("CSV is corrupt (HTML page), deleting and re-downloading...")
+            csv_path.unlink()
+
     print(f"CSV exists: {csv_path.exists()}")
     if not csv_path.exists():
         print("Downloading CSV...")
