@@ -1,26 +1,26 @@
 """
-utils/data.py — Data loading adapted from 5_country_monthly_explorer.py.
+utils/data.py — Data loading with Streamlit caching.
 
 load_data() is cached with @st.cache_resource so the expensive
 shapefile + CSV merge only happens once per server session.
+Downloads data from Google Drive automatically if not present locally.
 """
 import streamlit as st
 import pandas as pd
 
 from config import ENRICHED_CSV, HYDROBASINS_SHP
+from utils.download_data import ensure_data
 
 
 @st.cache_resource(show_spinner="Loading data (first run only)…")
 def load_data():
-    """Load and merge shapefile + CSV into a single GeoDataFrame.
+    """Download if needed, then load and merge shapefile + CSV."""
+    ensure_data()
 
-    Identical logic to load_data() in 5_country_monthly_explorer.py,
-    but reads paths from config.py and is cached for the whole session.
-    """
     try:
         import geopandas as gpd
-    except ImportError as e:
-        raise SystemExit("geopandas is required. Install with: pip install geopandas") from e
+    except ImportError:
+        raise SystemExit("geopandas is required. Install with: pip install geopandas")
 
     panel = pd.read_csv(ENRICHED_CSV, low_memory=False)
     panel["pfaf_id"] = pd.to_numeric(panel["pfaf_id"], errors="coerce").astype("Int64")
@@ -28,8 +28,6 @@ def load_data():
     basins = gpd.read_file(HYDROBASINS_SHP)
     basins["PFAF_ID"] = pd.to_numeric(basins["PFAF_ID"], errors="coerce").astype("Int64")
 
-    # Drop overlapping columns from shapefile so panel is authoritative
-    # (same logic as the original script to avoid _x/_y suffixes)
     overlap = (set(basins.columns) & set(panel.columns)) - {"PFAF_ID", "geometry"}
     if overlap:
         basins = basins.drop(columns=list(overlap))
@@ -46,14 +44,12 @@ def load_data():
 
 @st.cache_data
 def get_countries(_gdf):
-    """Return sorted list of country name_0 values. Cached separately."""
+    """Return sorted list of country name_0 values."""
     return sorted(_gdf["name_0"].dropna().unique().tolist())
 
 
 def filter_country(gdf, name: str = None, gid: str = None):
-    """Restrict to one country's sub-basins.
-    Identical to filter_country() in 5_country_monthly_explorer.py.
-    """
+    """Restrict to one country's sub-basins."""
     if gid:
         sub = gdf[gdf["gid_0"] == gid].copy()
         descriptor = gid
