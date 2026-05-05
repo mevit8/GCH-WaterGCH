@@ -8,28 +8,13 @@ Handles:
   - Navigation between Global map and Country deep-dive
 """
 import streamlit as st
-from config import SCENARIOS, YEARS, SCENARIO_TOOLTIPS, YEAR_TOOLTIPS, ENRICHED_CSV, HYDROBASINS_SHP
+from config import SCENARIOS, YEARS, SCENARIO_TOOLTIPS, YEAR_TOOLTIPS
 
 st.set_page_config(
     page_title="Water Risk Explorer",
     page_icon=":material/water_drop:",
     layout="wide",
 )
-
-# ── Guard: show setup instructions if data files are missing ──────────────────
-if not ENRICHED_CSV.exists() or not HYDROBASINS_SHP.exists():
-    st.error(":material/error: Data files not found")
-    st.markdown(f"""
-Place your data files in the `data/` folder next to `streamlit_app.py`:
-
-| File | Expected path |
-|------|--------------|
-| Enriched panel CSV | `{ENRICHED_CSV}` |
-| HydroBASINS shapefile | `{HYDROBASINS_SHP}` |
-
-Or edit the `ENRICHED_CSV` and `HYDROBASINS_SHP` paths at the top of **config.py**.
-""")
-    st.stop()
 
 # ── Shared sidebar selectors ──────────────────────────────────────────────────
 # These write directly to session_state via their `key=` parameter.
