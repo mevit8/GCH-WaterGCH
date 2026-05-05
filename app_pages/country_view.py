@@ -1,40 +1,21 @@
 """
-app_pages/country_view.py — Country deep-dive page.
+app_pages/country_view.py — Country deep-dive using Plotly for fast browser rendering.
 
-Tab 1 (Annual):  Same three panels as global, filtered + zoomed to the country.
-Tab 2 (Monthly): Small-multiples maps (per indicator) + aggregated line chart.
+Tab 1 (Annual):  Three Plotly choropleth maps filtered + zoomed to the country.
+Tab 2 (Monthly): Small-multiples Plotly maps + aggregated line chart.
 
-Scenario/year come from session_state (sidebar selectors in streamlit_app.py).
-All renders are cached by (country, scenario, year) so re-selecting the same
-combination is instant.
+Data is loaded/cached once; rendering happens in the browser — no server-side
+image generation per request.
 """
 import streamlit as st
 
 from utils.data import load_data, get_countries, filter_country
-from utils.plots import (
-    render_country_annual_map,
-    render_monthly_smallmultiples,
-    render_country_lines,
+from utils.plots_plotly import (
+    render_country_annual_plotly,
+    render_monthly_smallmultiples_plotly,
+    render_country_lines_plotly,
 )
 from config import SCENARIOS, YEARS, INDICATORS
-
-
-# ── Cached render helpers ──────────────────────────────────────────────────────
-
-@st.cache_data(show_spinner=False)
-def _cached_annual_map(_country_gdf, scenario, year, descriptor):
-    return render_country_annual_map(_country_gdf, scenario, year, descriptor)
-
-
-@st.cache_data(show_spinner=False)
-def _cached_small_multiples(_country_gdf, stem, descriptor, what="score"):
-    ind = next(i for i in INDICATORS if i["stem"] == stem)
-    return render_monthly_smallmultiples(_country_gdf, ind, descriptor, what)
-
-
-@st.cache_data(show_spinner=False)
-def _cached_lines(_country_gdf, descriptor):
-    return render_country_lines(_country_gdf, descriptor)
 
 
 # ── Page body ──────────────────────────────────────────────────────────────────
@@ -72,12 +53,18 @@ tab_annual, tab_monthly = st.tabs([
 # ── Tab 1: Annual ──────────────────────────────────────────────────────────────
 with tab_annual:
     st.caption(
-        "Same three panels as the global map, filtered and zoomed to this country. "
+        "Supply, demand, and stress maps filtered to this country. "
         "Change scenario or time horizon in the sidebar."
     )
-    with st.spinner("Rendering country map…"):
-        png = _cached_annual_map(country_gdf, scenario, year, descriptor)
-    st.image(png, use_container_width=True)
+
+    with st.spinner("Rendering maps…"):
+        fig_a, fig_b, fig_c = render_country_annual_plotly(
+            country_gdf, scenario, year, descriptor
+        )
+
+    st.plotly_chart(fig_a, use_container_width=True)
+    st.plotly_chart(fig_b, use_container_width=True)
+    st.plotly_chart(fig_c, use_container_width=True)
 
 
 # ── Tab 2: Monthly ─────────────────────────────────────────────────────────────
@@ -88,24 +75,23 @@ with tab_monthly:
         "use the Annual view for future scenarios."
     )
 
-    # ── Aggregated line chart (all 3 indicators, one figure) ──────────────────
+    # ── Line chart ────────────────────────────────────────────────────────────
     st.subheader("Seasonal aggregation", divider=False)
     st.caption(
         "Area-weighted mean and unweighted median across all sub-basins. "
-        "Left axis = raw value · Right axis = Aqueduct score (0–5)."
+        "Solid lines = raw value · Dashed lines = Aqueduct score (0-5)."
     )
     with st.spinner("Computing monthly aggregates…"):
-        lines_png = _cached_lines(country_gdf, descriptor)
-    st.image(lines_png, use_container_width=True)
+        fig_lines = render_country_lines_plotly(country_gdf, descriptor)
+    st.plotly_chart(fig_lines, use_container_width=True)
 
-    # ── Small-multiples maps (per indicator, selectable) ─────────────────────
+    # ── Small-multiples maps ──────────────────────────────────────────────────
     st.subheader("Spatial distribution by month", divider=False)
 
     what = st.radio(
         "Value type",
         options=["score", "raw"],
-        format_func=lambda x: "Aqueduct score (0–5, comparable across indicators)"
-                               if x == "score" else "Raw value (native units)",
+        format_func=lambda x: "Aqueduct score (0-5)" if x == "score" else "Raw value",
         horizontal=True,
         key="monthly_what",
     )
@@ -114,20 +100,21 @@ with tab_monthly:
     for tab, ind in zip(ind_tabs, INDICATORS):
         with tab:
             with st.spinner(f"Rendering {ind['title']} maps…"):
-                mm_png = _cached_small_multiples(country_gdf, ind["stem"], descriptor, what)
-            if mm_png is None:
+                fig_mm = render_monthly_smallmultiples_plotly(
+                    country_gdf, ind, descriptor, what
+                )
+            if fig_mm is None:
                 st.warning(
                     f"Monthly columns for **{ind['title']}** not found in the dataset."
                 )
             else:
-                st.image(mm_png, use_container_width=True)
+                st.plotly_chart(fig_mm, use_container_width=True)
 
-    # ── Methodology blurb ─────────────────────────────────────────────────────
+    # ── Methodology ───────────────────────────────────────────────────────────
     with st.expander(":material/info: How monthly values were estimated", expanded=False):
         st.markdown("""
 Monthly values are derived by splitting the 1979–2019 PCR-GLOBWB 2 simulation into
-12 monthly time series per sub-basin (all Januaries, all Februaries, etc.) and
-computing the indicator independently for each.
+12 monthly time series per sub-basin and computing the indicator independently for each.
 
 For **water stress** and **depletion**, demand and supply are aggregated per calendar
 month and the ratio computed. For **interannual variability**, the coefficient of
