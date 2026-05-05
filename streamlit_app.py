@@ -7,9 +7,16 @@ Handles:
     written to session_state so both pages read the same values
   - Navigation between Global map and Country deep-dive
 """
+import os
+from pathlib import Path
 import streamlit as st
-from utils.download_data import ensure_data
+from utils.download_data import ensure_data, DATA_DIR
 from config import SCENARIOS, YEARS, SCENARIO_TOOLTIPS, YEAR_TOOLTIPS
+
+print(f"DATA_DIR = {DATA_DIR}")
+print(f"DATA_DIR exists = {DATA_DIR.exists()}")
+print(f"ENV DATA_DIR = {os.environ.get('DATA_DIR', 'NOT SET')}")
+
 ensure_data()
 
 st.set_page_config(
