@@ -1,0 +1,12 @@
+.venv/
+data/
+__pycache__/
+*.pyc
+.streamlit/
+*.png
+*.csv
+*.shp
+*.dbf
+*.shx
+*.prj
+*.gpkg
