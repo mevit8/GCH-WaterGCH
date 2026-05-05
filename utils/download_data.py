@@ -10,7 +10,7 @@ import zipfile
 from pathlib import Path
 
 import os
-DATA_DIR = Path("/data") if os.environ.get("RAILWAY_ENVIRONMENT") else Path("data")
+DATA_DIR = Path(os.environ.get("DATA_DIR", "data"))
 
 # Google Drive file IDs
 GDRIVE_IDS = {
