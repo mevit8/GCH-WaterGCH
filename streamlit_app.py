@@ -8,7 +8,9 @@ Handles:
   - Navigation between Global map and Country deep-dive
 """
 import streamlit as st
+from utils.download_data import ensure_data
 from config import SCENARIOS, YEARS, SCENARIO_TOOLTIPS, YEAR_TOOLTIPS
+ensure_data()
 
 st.set_page_config(
     page_title="Water Risk Explorer",
