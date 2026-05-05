@@ -77,14 +77,24 @@ def ensure_data():
         _download("aqueduct_pfaf_panel_enriched.csv", GDRIVE_IDS["aqueduct_pfaf_panel_enriched.csv"])
 
     if not SHP_FILE.exists():
-        print("Downloading shapefile ZIP...")
         zip_path = DATA_DIR / "pfaf_lev06_merged.zip"
-        if not zip_path.exists():
-            _download("pfaf_lev06_merged.zip", GDRIVE_IDS["pfaf_lev06_merged.zip"])
+
+        # Delete corrupt zip from a previous failed attempt
+        if zip_path.exists():
+            print("Removing previous (possibly corrupt) zip...")
+            zip_path.unlink()
+
+        print("Downloading shapefile ZIP...")
+        _download("pfaf_lev06_merged.zip", GDRIVE_IDS["pfaf_lev06_merged.zip"])
+
         print("Extracting shapefile...")
-        with zipfile.ZipFile(zip_path, "r") as zf:
-            zf.extractall(DATA_DIR)
-        zip_path.unlink()  # free up space after extraction
-        print("Shapefile extracted.")
+        try:
+            with zipfile.ZipFile(zip_path, "r") as zf:
+                zf.extractall(DATA_DIR)
+            zip_path.unlink()
+            print("Shapefile extracted.")
+        except zipfile.BadZipFile:
+            zip_path.unlink()  # delete corrupt file so next run re-downloads
+            raise RuntimeError("Downloaded zip is corrupt — likely an HTML error page from Drive. Check file sharing permissions.")
 
     print("ensure_data() complete.")
