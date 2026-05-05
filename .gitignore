@@ -10,3 +10,5 @@ __pycache__/
 *.shx
 *.prj
 *.gpkg
+prerender_maps.py
+.env
