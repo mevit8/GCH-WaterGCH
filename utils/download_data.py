@@ -62,6 +62,34 @@ def _download(filename: str, file_id: str):
             if chunk:
                 f.write(chunk)
 
+    print(f"  ✓ {filename} ({dest.stat().st_size / 1e6:.1f} MB)")def _download(filename: str, file_id: str):
+    dest = DATA_DIR / filename
+    print(f"Downloading {filename} from Google Drive…")
+
+    session = requests.Session()
+
+    # Google now serves downloads from drive.usercontent.google.com
+    url = (
+        f"https://drive.usercontent.google.com/download"
+        f"?id={file_id}&export=download&authuser=0&confirm=t"
+    )
+
+    resp = session.get(url, stream=True, timeout=120)
+    resp.raise_for_status()
+
+    content_type = resp.headers.get("Content-Type", "")
+    if "text/html" in content_type:
+        raise RuntimeError(
+            f"Google Drive returned an HTML page instead of {filename}. "
+            "Quota may be exceeded — try again in 24 hours, or switch to a "
+            "different host (Hugging Face Hub recommended)."
+        )
+
+    with open(dest, "wb") as f:
+        for chunk in resp.iter_content(chunk_size=1 << 20):
+            if chunk:
+                f.write(chunk)
+
     print(f"  ✓ {filename} ({dest.stat().st_size / 1e6:.1f} MB)")
 
 
