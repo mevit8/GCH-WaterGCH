@@ -10,11 +10,10 @@ st.set_page_config(
     layout="wide",
 )
 
-st.logo("assets/final_logo.svg", size="large")
-
 ensure_data()
 
 with st.sidebar:
+    st.image("assets/final_logo.svg", width=160)
     st.divider()
     st.caption(
         "Data: WRI Aqueduct 4.0 · HydroBASINS Level-6 · "

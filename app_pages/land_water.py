@@ -18,7 +18,8 @@ DATA_DIR = Path("land_water")
 LAND_CLASSES = ["Crops", "TreeCrops", "Forest", "Grassland",
                 "Urban", "Water", "Other"]
 
-CM_TO_KM3 = 1e-5
+# cm/yr depth × km² area → km³ volume
+CM_KM2_TO_KM3 = 1e-5
 
 SCENARIO_LABELS = {
     "eat":       "EAT",
@@ -68,24 +69,24 @@ def load_scenarios() -> dict:
         df    = pd.read_csv(f)
         df.columns = [c.strip() for c in df.columns]
 
-        tot_col = next(
-            (c for c in df.columns
-             if "Scaled_total" in c
-             or c.strip().lower() == "scaled_total_cm_per_yr"),
-            None,
-        )
-        if tot_col is None:
+        # Build per-land-class km³ columns: depth (cm/yr) × area (km²) × factor
+        found_any = False
+        for lc in LAND_CLASSES:
+            raw_col  = f"Scaled_withdrawal_cm_per_yr_{lc}"
+            area_col = f"Area_km2_{lc}"
+            if raw_col in df.columns and area_col in df.columns:
+                depth = pd.to_numeric(df[raw_col],  errors="coerce").fillna(0.0)
+                area  = pd.to_numeric(df[area_col], errors="coerce").fillna(0.0)
+                df[f"{lc}_km3"] = depth * area * CM_KM2_TO_KM3
+                found_any = True
+            else:
+                df[f"{lc}_km3"] = 0.0
+
+        if not found_any:
             continue
 
-        df["total_km3"] = (
-            pd.to_numeric(df[tot_col], errors="coerce").fillna(0.0) * CM_TO_KM3
-        )
-        for lc in LAND_CLASSES:
-            col = f"Scaled_withdrawal_cm_per_yr_{lc}"
-            df[f"{lc}_km3"] = (
-                pd.to_numeric(df[col], errors="coerce").fillna(0.0) * CM_TO_KM3
-                if col in df.columns else 0.0
-            )
+        # Total = sum of all land classes
+        df["total_km3"] = df[[f"{lc}_km3" for lc in LAND_CLASSES]].sum(axis=1)
 
         agg = {"total_km3": ("total_km3", "sum")}
         for lc in LAND_CLASSES:
@@ -106,6 +107,12 @@ def _download_html(fig, filename: str):
         file_name=filename,
         mime="text/html",
     )
+
+
+def _chart_col():
+    """Return a column that takes ~70% of page width."""
+    col, _ = st.columns([3, 1])
+    return col
 
 
 # ── Intro ─────────────────────────────────────────────────────────────────────
@@ -181,9 +188,9 @@ for scen, ts in global_ts.items():
 fig1.update_layout(
     xaxis_title="Year",
     yaxis_title="Global water withdrawal (km³/yr)",
-    legend=dict(orientation="h", y=-0.2),
-    height=450,
-    margin=dict(t=20, b=80),
+    legend=dict(orientation="h", y=-0.25),
+    height=380,
+    margin=dict(t=10, b=80),
     hovermode="x unified",
     plot_bgcolor="white",
     paper_bgcolor="white",
@@ -191,8 +198,9 @@ fig1.update_layout(
 fig1.update_xaxes(showgrid=True, gridcolor="#eeeeee")
 fig1.update_yaxes(showgrid=True, gridcolor="#eeeeee")
 
-st.plotly_chart(fig1, use_container_width=True)
-_download_html(fig1, "withdrawals_timeseries.html")
+with _chart_col():
+    st.plotly_chart(fig1, use_container_width=True)
+    _download_html(fig1, "withdrawals_timeseries.html")
 
 st.divider()
 
@@ -234,15 +242,16 @@ fig2.add_hline(y=0, line_color="black", line_width=0.8)
 fig2.update_layout(
     xaxis_title="Scenario",
     yaxis_title="Percent change (%)",
-    height=400,
-    margin=dict(t=20, b=60),
+    height=340,
+    margin=dict(t=10, b=60),
     plot_bgcolor="white",
     paper_bgcolor="white",
 )
 fig2.update_yaxes(showgrid=True, gridcolor="#eeeeee")
 
-st.plotly_chart(fig2, use_container_width=True)
-_download_html(fig2, "withdrawals_pct_change.html")
+with _chart_col():
+    st.plotly_chart(fig2, use_container_width=True)
+    _download_html(fig2, "withdrawals_pct_change.html")
 
 st.divider()
 
@@ -285,12 +294,13 @@ fig3.update_layout(
     xaxis_title="Scenario",
     yaxis_title="Water withdrawals (km³/yr)",
     legend=dict(orientation="h", y=-0.25),
-    height=450,
-    margin=dict(t=20, b=100),
+    height=380,
+    margin=dict(t=10, b=100),
     plot_bgcolor="white",
     paper_bgcolor="white",
 )
 fig3.update_yaxes(showgrid=True, gridcolor="#eeeeee")
 
-st.plotly_chart(fig3, use_container_width=True)
-_download_html(fig3, "withdrawals_by_land_class_2050.html")
+with _chart_col():
+    st.plotly_chart(fig3, use_container_width=True)
+    _download_html(fig3, "withdrawals_by_land_class_2050.html")
