@@ -3,7 +3,6 @@ streamlit_app.py — Main entry point for the WaterReqGCH dashboard.
 """
 import streamlit as st
 from utils.download_data import ensure_data
-from config import SCENARIOS, YEARS, SCENARIO_TOOLTIPS, YEAR_TOOLTIPS
 
 st.set_page_config(
     page_title="Water Risk Explorer",
@@ -14,24 +13,11 @@ st.set_page_config(
 ensure_data()
 
 with st.sidebar:
-    st.markdown("### :material/tune: Scenario settings")
-
-    st.selectbox(
-        "Time horizon",
-        options=list(YEARS.keys()),
-        format_func=lambda k: YEARS[k],
-        key="year",
-        help="\n\n".join(f"**{YEARS[k]}** — {YEAR_TOOLTIPS[k]}" for k in YEARS),
+    st.markdown("### :material/water_drop: WaterReqGCH")
+    st.caption(
+        "A model of the Global Climate Hub to assess water availability, "
+        "withdrawals, stress and effects of land and diet policies on water resources."
     )
-
-    st.selectbox(
-        "Scenario",
-        options=list(SCENARIOS.keys()),
-        format_func=lambda k: SCENARIOS[k],
-        key="scenario",
-        help="\n\n".join(f"**{SCENARIOS[k]}** — {SCENARIO_TOOLTIPS[k]}" for k in SCENARIOS),
-    )
-
     st.divider()
     st.caption(
         "Data: WRI Aqueduct 4.0 · HydroBASINS Level-6 · "
@@ -39,7 +25,8 @@ with st.sidebar:
     )
 
 pages = [
-    st.Page("app_pages/global_view.py",  title="Global map",       icon=":material/public:"),
+    st.Page("app_pages/intro.py",        title="Introduction",     icon=":material/info:"),
+    st.Page("app_pages/global_view.py",  title="Global model",     icon=":material/public:"),
     st.Page("app_pages/country_view.py", title="Country deep-dive", icon=":material/travel_explore:"),
 ]
 
