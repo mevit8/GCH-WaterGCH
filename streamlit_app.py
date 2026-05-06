@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide",
 )
 
-st.logo("assets/final_logo.svg")
+st.logo("assets/final_logo.svg", size="large")
 
 ensure_data()
 
