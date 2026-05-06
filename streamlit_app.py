@@ -10,14 +10,11 @@ st.set_page_config(
     layout="wide",
 )
 
+st.logo("assets/final_logo.svg")
+
 ensure_data()
 
 with st.sidebar:
-    st.markdown("### :material/water_drop: WaterReqGCH")
-    st.caption(
-        "A model of the Global Climate Hub to assess water availability, "
-        "withdrawals, stress and effects of land and diet policies on water resources."
-    )
     st.divider()
     st.caption(
         "Data: WRI Aqueduct 4.0 · HydroBASINS Level-6 · "
@@ -25,9 +22,10 @@ with st.sidebar:
     )
 
 pages = [
-    st.Page("app_pages/intro.py",        title="Introduction",     icon=":material/info:"),
-    st.Page("app_pages/global_view.py",  title="Global model",     icon=":material/public:"),
+    st.Page("app_pages/intro.py",        title="Introduction",      icon=":material/info:"),
+    st.Page("app_pages/global_view.py",  title="Global model",      icon=":material/public:"),
     st.Page("app_pages/country_view.py", title="Country deep-dive", icon=":material/travel_explore:"),
+    st.Page("app_pages/land_water.py",   title="Land & water",      icon=":material/forest:"),
 ]
 
 page = st.navigation(pages, position="top")
