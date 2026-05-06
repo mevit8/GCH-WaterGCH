@@ -3,7 +3,7 @@ data/
 __pycache__/
 *.pyc
 .streamlit/
-*.png
+# *.png
 *.csv
 *.shp
 *.dbf
