@@ -22,25 +22,20 @@ with col_a:
         options=list(SCENARIOS.keys()),
         format_func=lambda k: SCENARIOS[k],
         key="scenario",
-        help="\n\n".join(
-            f"**{SCENARIOS[k]}** — {SCENARIO_TOOLTIPS[k]}" for k in SCENARIOS
-        ),
     )
+    st.caption(SCENARIO_TOOLTIPS[st.session_state.get("scenario", "bau")])
+
 with col_b:
     st.selectbox(
         "Time horizon",
         options=list(YEARS.keys()),
         format_func=lambda k: YEARS[k],
         key="year",
-        help="\n\n".join(
-            f"**{YEARS[k]}** — {YEAR_TOOLTIPS[k]}" for k in YEARS
-        ),
     )
+    st.caption(YEAR_TOOLTIPS[st.session_state.get("year", "50")])
 
 scenario = st.session_state.get("scenario", "bau")
 year     = st.session_state.get("year", "50")
-
-st.caption(f"Showing **{SCENARIOS[scenario]}** · **{YEARS[year]}**")
 
 
 def _show_panel(panel: str, title: str, description: str):
