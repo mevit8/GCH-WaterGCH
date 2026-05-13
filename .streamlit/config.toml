@@ -94,9 +94,9 @@ dataframeHeaderBackgroundColor    = "#E4EDF5"
 
 # --- Sidebar ---
 [theme.sidebar]
-backgroundColor             = "#1A2332"   # Dark navy — provides contrast with the white canvas
-secondaryBackgroundColor    = "#253346"
-codeBackgroundColor         = "#253346"
-textColor                   = "#E8EFF5"
-borderColor                 = "#2E4060"
-primaryColor                = "#5BAEE0"   # Lighter blue so active items are readable on dark bg
+backgroundColor             = "#EEF3F8"   
+secondaryBackgroundColor    = "#E2EBF3"
+codeBackgroundColor         = "#E2EBF3"
+textColor                   = "#1A2332"   
+borderColor                 = "#C8D6E5"
+primaryColor                = "#1B6CA8"   
