@@ -1,27 +1,102 @@
+# ============================================================
+#  Global Climate Hub — shared Streamlit theme
+#  Drop this file into .streamlit/config.toml in each app:
+#    landgch-dashboard / GCH-WaterGCH / GCH-Economy
+# ============================================================
+
 [theme]
 base = "light"
-primaryColor = "#1a6b8a"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f4f8fb"
-textColor = "#1a2e3b"
-linkColor = "#1a6b8a"
-borderColor = "#d0dde6"
-showWidgetBorder = true
-showSidebarBorder = true
-baseRadius = "8px"
-buttonRadius = "8px"
-linkUnderline = false
 
-font = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-baseFontSize = 14
+# --- Core palette ---
+primaryColor            = "#1B6CA8"   # Deep science blue — buttons, links, active elements
+backgroundColor         = "#FFFFFF"   # Clean white main canvas
+secondaryBackgroundColor = "#F0F4F8"  # Cool light-grey — sidebars, widget backgrounds, code blocks
+textColor               = "#1A2332"   # Near-black — body text
+linkColor               = "#1B6CA8"
+borderColor             = "#C8D6E5"
+codeTextColor           = "#1A2332"
+codeBackgroundColor     = "#E8EFF5"
+
+# --- Typography ---
+font       = "'Inter':https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&display=swap"
+codeFont   = "'JetBrains Mono':https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+
+baseFontSize   = 14
 baseFontWeight = 400
-headingFontSizes = ["30px", "24px", "20px", "16px", "14px", "12px"]
+codeFontSize   = "13px"
+codeFontWeight = 400
+
+headingFontSizes   = ["32px", "24px", "20px", "16px", "14px", "12px"]
 headingFontWeights = [600, 600, 600, 500, 500, 500]
 
-chartCategoricalColors = ["#1a6b8a", "#2ca02c", "#d62728", "#ff7f0e", "#9467bd", "#8c564b", "#17becf"]
+linkUnderline = false
 
+# --- Shape ---
+baseRadius       = "6px"
+buttonRadius     = "6px"
+showWidgetBorder = true
+showSidebarBorder = true
+
+# --- Semantic / status colors ---
+# These map to :green[], :red[], st.badge color="green", etc.
+greenColor  = "#1A7F37"   # Low stress / healthy / positive delta
+blueColor   = "#1B6CA8"   # Neutral info
+yellowColor = "#B08000"   # Medium-high stress / caution
+orangeColor = "#C55A00"   # High stress / warning
+redColor    = "#C62828"   # Extremely high stress / error
+violetColor = "#6A3D9A"   # Secondary accent
+grayColor   = "#6E7F8D"   # Arid / no data / muted
+
+greenBackgroundColor  = "#DAFBE1"
+greenTextColor        = "#116329"
+yellowBackgroundColor = "#FFF8C5"
+yellowTextColor       = "#7D4E00"
+orangeBackgroundColor = "#FFE4CC"
+orangeTextColor       = "#8A3500"
+redBackgroundColor    = "#FFDEDE"
+redTextColor          = "#8B1A1A"
+blueBackgroundColor   = "#DFF0FF"
+blueTextColor         = "#0A4A7A"
+grayBackgroundColor   = "#EBEBEB"
+grayTextColor         = "#4A5568"
+
+# --- Chart colors ---
+# Ordered to match the four GCH sector groups:
+#   Agriculture → Industry → Transport → Services
+# and to work well on the white canvas.
+chartCategoricalColors = [
+    "#1B6CA8",   # Science blue      (primary)
+    "#2E9B6E",   # Forest green
+    "#C55A00",   # Burnt orange
+    "#6A3D9A",   # Violet
+    "#B08000",   # Amber
+    "#1A7F37",   # Deep green
+    "#6E7F8D",   # Slate grey
+]
+
+# Sequential scale for heatmaps / choropleth (10 stops, light → dark)
+chartSequentialColors = [
+    "#EEF4FB",
+    "#C8DDED",
+    "#A0C4E0",
+    "#6AAACF",
+    "#3D8FBF",
+    "#1B6CA8",
+    "#15568A",
+    "#10406E",
+    "#0A2D52",
+    "#051B35",
+]
+
+# --- Dataframe ---
+dataframeBorderColor              = "#C8D6E5"
+dataframeHeaderBackgroundColor    = "#E4EDF5"
+
+# --- Sidebar ---
 [theme.sidebar]
-backgroundColor = "#f4f8fb"
-secondaryBackgroundColor = "#e6eef4"
-textColor = "#1a2e3b"
-borderColor = "#d0dde6"
+backgroundColor             = "#1A2332"   # Dark navy — provides contrast with the white canvas
+secondaryBackgroundColor    = "#253346"
+codeBackgroundColor         = "#253346"
+textColor                   = "#E8EFF5"
+borderColor                 = "#2E4060"
+primaryColor                = "#5BAEE0"   # Lighter blue so active items are readable on dark bg

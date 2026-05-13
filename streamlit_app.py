@@ -13,7 +13,13 @@ st.set_page_config(
 ensure_data()
 
 with st.sidebar:
-    st.image("assets/final_logo.svg", width=160)
+    _, col, _ = st.columns([0.5, 3, 0.5])
+    with col:
+        st.image("assets/final_logo.svg")
+    st.space("small")
+    _, col, _ = st.columns([0.5, 3, 0.5])
+    with col:
+        st.image("assets/logo.png")        # add SDSN logo — copy from Economy repo if missing
     st.divider()
     st.caption(
         "Data: WRI Aqueduct 4.0 · HydroBASINS Level-6 · "
